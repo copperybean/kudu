@@ -136,6 +136,7 @@
 #include "kudu/util/metrics.h"
 #include "kudu/util/monotime.h"
 #include "kudu/util/mutex.h"
+#include "kudu/util/net/dns_resolver.h"
 #include "kudu/util/pb_util.h"
 #include "kudu/util/random_util.h"
 #include "kudu/util/scoped_cleanup.h"
@@ -4728,6 +4729,9 @@ Status CatalogManager::BuildLocationsForTablet(
         //
         // TODO(wdberkeley): We should track these RPC addresses in the master table itself.
         tsinfo_pb->add_rpc_addresses()->CopyFrom(peer.last_known_addr());
+      }
+      for (auto & rpc_addr : *tsinfo_pb->mutable_rpc_addresses()) {
+        DnsResolver::ResolveAddress(rpc_addr);
       }
       return tsinfo_pb;
     };

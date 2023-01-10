@@ -54,6 +54,7 @@
 #include "kudu/util/flag_tags.h"
 #include "kudu/util/logging.h"
 #include "kudu/util/monotime.h"
+#include "kudu/util/net/dns_resolver.h"
 #include "kudu/util/net/sockaddr.h"
 #include "kudu/util/pb_util.h"
 #include "kudu/util/status.h"
@@ -514,7 +515,9 @@ void MasterServiceImpl::ConnectToMaster(const ConnectToMasterRequestPB* /*req*/,
                 "unable to get HostPorts for masters");
     resp->mutable_master_addrs()->Reserve(hostports.size());
     for (auto& hp : hostports) {
-      *resp->add_master_addrs() = std::move(hp);
+      auto & addrs = *resp->add_master_addrs();
+      addrs = std::move(hp);
+      DnsResolver::ResolveAddress(addrs);
     }
   }
 

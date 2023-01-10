@@ -34,6 +34,7 @@
 namespace kudu {
 
 class HostPort;
+class HostPortPB;
 class ThreadPool;
 
 // A utility class for DNS resolution. The resolver supports both synchronous
@@ -78,6 +79,8 @@ class DnsResolver {
   void ResolveAddressesAsync(const HostPort& hostport,
                              std::vector<Sockaddr>* addresses,
                              const StatusCallback& cb);
+
+  static void ResolveAddress(HostPortPB& hostport);
 
  private:
   // The cache is keyed by the host part of the HostPort structure, and the

@@ -25,6 +25,7 @@
 #include <gflags/gflags.h>
 #include <glog/logging.h>
 
+#include "kudu/common/common.pb.h"
 #include "kudu/gutil/callback.h"
 #include "kudu/gutil/port.h"
 #include "kudu/util/flag_tags.h"
@@ -91,6 +92,18 @@ void DnsResolver::ResolveAddressesAsync(const HostPort& hostport,
   if (!s.ok()) {
     cb.Run(s);
   }
+}
+
+void DnsResolver::ResolveAddress(HostPortPB& hostport)
+{
+  static DnsResolver resolver(1, 0, MonoDelta::FromSeconds(60 * 60 * 6));
+
+  vector<Sockaddr> addrs;
+  resolver.ResolveAddresses(HostPort(hostport.host(), hostport.port()), &addrs);
+  if (PREDICT_FALSE(addrs.empty())) {
+    throw std::runtime_error(hostport.host() + " can not be resolved");
+  }
+  hostport.set_host(addrs[0].host());
 }
 
 Status DnsResolver::DoResolution(const HostPort& hostport,
